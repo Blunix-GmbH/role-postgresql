@@ -1,0 +1,35 @@
+# Default PostgreSQL version to install
+postgresql_version: 9.6
+
+# Global configuration options that will be set in postgresql.conf
+postgresql_conf: {}
+
+# hba entries for pg_bha.conf
+# The defaults are the defaults from the package maintainer
+postgresql_hba_conf:
+  - type: local
+    database: all
+    user: postgres
+    auth_method: peer
+  - type: local
+    database: all
+    user: all
+    auth_method: peer
+  - type: host
+    database: all
+    user: all
+    address: '127.0.0.1/32'
+    auth_method: md5
+  - type: host
+    database: all
+    user: all
+    address: '::1/128'
+    auth_method: md5
+
+# The settings are given directly to the Ansible module
+# https://docs.ansible.com/ansible/latest/modules/postgresql_db_module.html
+postgresql_databases: []
+
+# The settings are given directly to the Ansible module
+# https://docs.ansible.com/ansible/latest/modules/postgresql_user_module.html
+postgresql_users: []

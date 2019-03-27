@@ -1,0 +1,57 @@
+- name: install PostgreSQL python packages
+  apt:
+    name: "python-psycopg2"
+    state: present
+
+- name: install PostgreSQL server
+  apt:
+    name:
+      - "postgresql-{{ postgresql_version }}"
+      - "postgresql-contrib-{{ postgresql_version }}"
+    state: present
+
+- name: template custom settings to bottom of /etc/postgresql/postgresql_version/main/postgresql.conf
+  blockinfile:
+    path: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
+    block: |
+      {% for postgresql_conf_key in postgresql_conf %}
+      {{ postgresql_conf_key }} = '{{ postgresql_conf[postgresql_conf_key] }}'
+      {% endfor %}
+    marker: "# This block is managed by ansible ({mark})"
+    insertafter: EOF
+    owner: postgres
+    group: postgres
+    mode: 0640
+  notify: restart postgresql
+
+- name: configure authentication
+  template:
+    src: "templates/etc/postgresql/all_versions/main/pg_hba.conf.j2"
+    dest: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
+    owner: postgres
+    group: postgres
+    mode: 0600
+  notify: restart postgresql
+
+- name: setup PostgreSQL databases
+  postgresql_db: "{{ postgresql_database }}"
+  with_items: "{{ postgresql_databases }}"
+  loop_control:
+    loop_var: postgresql_database
+#  become: true
+#  become_user: postgres
+  # See: https://github.com/ansible/ansible/issues/16048#issuecomment-229012509
+#  vars:
+#    ansible_ssh_pipelining: true
+
+- name: setup PostgreSQL users
+  postgresql_user: "{{ postgresql_user }}"
+  with_items: "{{ postgresql_users }}"
+  loop_control:
+    loop_var: postgresql_user
+#  no_log: true
+#  become: true
+#  become_user: postgres
+  # See: https://github.com/ansible/ansible/issues/16048#issuecomment-229012509
+#  vars:
+#    ansible_ssh_pipelining: true
