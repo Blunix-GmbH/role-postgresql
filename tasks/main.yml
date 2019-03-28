@@ -23,6 +23,7 @@
     group: postgres
     mode: 0640
   notify: restart postgresql
+  when: postgresql_conf is defined
 
 - name: configure authentication
   template:
@@ -32,26 +33,50 @@
     group: postgres
     mode: 0600
   notify: restart postgresql
+  when: postgresql_hba_conf is defined
 
 - name: setup PostgreSQL databases
-  postgresql_db: "{{ postgresql_database }}"
+  postgresql_db:
+    name: "{{ postgresql_database.name }}"
+    state: "{{ postgresql_database.state | default('present') }}"
+    login_host: "{{ postgresql_database.login_host | default('localhost') }}"
+    login_password: "{{ postgresql_database.login_password | default(omit) }}"
+    login_user: "{{ postgresql_database.login_user | default('postgres') }}"
+    login_unix_socket: "{{ postgresql_database.login_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
+    port: "{{ postgresql_database.port | default(omit) }}"
+    owner: "{{ postgresql_database.owner | default('postgres') }}"
+    encoding: "{{ postgresql_database.encoding | default('UTF-8') }}"
+    lc_collate: "{{ postgresql_database.lc_collate | default('en_US.UTF-8') }}"
+    lc_ctype: "{{ postgresql_database.lc_ctype | default('en_US.UTF-8') }}"
+    template: "{{ postgresql_database.template | default('template0') }}"
   with_items: "{{ postgresql_databases }}"
   loop_control:
     loop_var: postgresql_database
-#  become: true
-#  become_user: postgres
-  # See: https://github.com/ansible/ansible/issues/16048#issuecomment-229012509
-#  vars:
-#    ansible_ssh_pipelining: true
+  when: postgresql_databases is defined
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
 
 - name: setup PostgreSQL users
-  postgresql_user: "{{ postgresql_user }}"
+  postgresql_user:
+    name: "{{ postgresql_user.name }}"
+    db: "{{ postgresql_user.db | default(omit) }}"
+    state: "{{ postgresql_user.state | default('present') }}"
+    password: "{{ postgresql_user.password | default(omit) }}"
+    encrypted: "{{ postgresql_user.encrypted | default(omit) }}"
+    login_host: "{{ postgresql_user.login_host | default('localhost') }}"
+    login_password: "{{ postgresql_user.login_password | default(omit) }}"
+    login_user: "{{ postgresql_user.login_user | default('postgres') }}"
+    login_unix_socket: "{{ postgresql_user.login_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
+    port: "{{ postgresql_user.port | default(omit) }}"
+    priv: "{{ postgresql_user.priv | default(omit) }}"
+    role_attr_flags: "{{ postgresql_user.role_attr_flags | default(omit) }}"
   with_items: "{{ postgresql_users }}"
   loop_control:
     loop_var: postgresql_user
-#  no_log: true
-#  become: true
-#  become_user: postgres
-  # See: https://github.com/ansible/ansible/issues/16048#issuecomment-229012509
-#  vars:
-#    ansible_ssh_pipelining: true
+  when: postgresql_users is defined
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
