@@ -3,6 +3,17 @@
     name: "python-psycopg2"
     state: present
 
+- name: install PostgreSQL repo apt key
+  apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+
+- name: install PostgreSQL apt repo
+  apt_repository:
+    filename: postgresql
+    repo: 'deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main'
+    state: present
+
 - name: install PostgreSQL server
   apt:
     name:
