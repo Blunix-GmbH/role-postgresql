@@ -6,5 +6,5 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
 
-def test_path_exists(host):
-    assert host.file('/etc/postgresql').exists
+def test_socket_http(host):
+    assert host.socket("tcp://127.0.0.1:5432").is_listening

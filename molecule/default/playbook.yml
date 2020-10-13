@@ -1,13 +1,14 @@
----
 - name: Converge
   hosts: all
   become: True
   roles:
+    - role: role-locales
     - role: role-postgresql
   vars:
+
     # Settings to append to postgresql.conf
     postgresql_conf:
-      listen_addresses: localhost
+      listen_addresses: 127.0.0.1
 
     # The settings are given directly to the Ansible module
     # https://docs.ansible.com/ansible/latest/modules/postgresql_db_module.html

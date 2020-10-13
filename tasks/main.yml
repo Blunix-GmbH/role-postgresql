@@ -1,24 +1,8 @@
-- name: install PostgreSQL python packages
-  apt:
-    name: "python-psycopg2"
-    state: present
-
-- name: install PostgreSQL repo apt key
-  apt_key:
-    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
-    state: present
-
-- name: install PostgreSQL apt repo
-  apt_repository:
-    filename: postgresql
-    repo: 'deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main'
-    state: present
-
-- name: install PostgreSQL server
+- name: install Postgresql
   apt:
     name:
       - "postgresql-{{ postgresql_version }}"
-      - "postgresql-contrib-{{ postgresql_version }}"
+      - python3-psycopg2
     state: present
 
 - name: template custom settings to bottom of /etc/postgresql/postgresql_version/main/postgresql.conf
@@ -38,7 +22,7 @@
 
 - name: configure authentication
   template:
-    src: "templates/etc/postgresql/all_versions/main/pg_hba.conf.j2"
+    src: templates/etc/postgresql/all_versions/main/pg_hba.conf.j2
     dest: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
     owner: postgres
     group: postgres
@@ -64,10 +48,10 @@
   loop_control:
     loop_var: postgresql_database
   when: postgresql_databases is defined
-  become: true
+  become: True
   become_user: postgres
   vars:
-    ansible_ssh_pipelining: true
+    ansible_ssh_pipelining: True
 
 - name: setup PostgreSQL users
   postgresql_user:
@@ -87,7 +71,7 @@
   loop_control:
     loop_var: postgresql_user
   when: postgresql_users is defined
-  become: true
+  become: True
   become_user: postgres
   vars:
-    ansible_ssh_pipelining: true
+    ansible_ssh_pipelining: True

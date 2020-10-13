@@ -1,5 +1,5 @@
 # Default PostgreSQL version to install
-postgresql_version: 9.6
+postgresql_version: 13
 
 # Global configuration options that will be appended to postgresql.conf
 #postgresql_conf:
@@ -37,4 +37,4 @@ postgresql_hba_conf:
 
 # Unix socker of PostgreSQL
 postgresql_unix_socket_directories:
-- /var/run/postgresql
+  - /var/run/postgresql
